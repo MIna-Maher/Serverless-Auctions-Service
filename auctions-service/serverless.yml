@@ -10,8 +10,26 @@ provider:
   runtime: nodejs12.x
   memorySize: 256
   stage: ${opt:stage, 'dev'}
-  #region: eu-west-1 ## Ireland Region
+  region:  us-east-2 ##  Region
   
+resources:
+    Resources:
+      AuctionTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+         BillingMode: PROVISIONED  ##free tier eligible
+         ProvisionedThroughput:
+          ReadCapacityUnits: 1     ###free tier eligible up to 10
+          WriteCapacityUnits: 1    ###free tier eligible up to 10
+         TableName: AuctionsTable
+         AttributeDefinitions: 
+            - AttributeName: id
+              AttributeType: S
+
+         KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        
 functions:
   createAuction:
     handler: src/handlers/createAuction.handler
