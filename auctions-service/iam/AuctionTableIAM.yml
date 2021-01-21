@@ -1,0 +1,5 @@
+AuctionTableIAM:
+  Effect: 'Allow'
+  Action:
+    - 'DynamoDB:PutItem'
+  Resource: ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file

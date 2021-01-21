@@ -1,0 +1,14 @@
+AuctionTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+         BillingMode: PROVISIONED  ##free tier eligible
+         ProvisionedThroughput:
+          ReadCapacityUnits: 1     ###free tier eligible up to 10
+          WriteCapacityUnits: 1    ###free tier eligible up to 10
+         TableName: AuctionsTable-${self:provider.stage}
+         AttributeDefinitions: 
+            - AttributeName: id
+              AttributeType: S
+         KeySchema:
+          - AttributeName: id
+            KeyType: HASH

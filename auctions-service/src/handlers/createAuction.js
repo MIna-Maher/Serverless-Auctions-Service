@@ -12,7 +12,7 @@ async function createAuction(event, context) { // those arguments will be provid
     createdAt: now.toISOString(),
   };
   await DocumentClient.put( {
-    TableName : 'AuctionsTable',
+    TableName : process.env.AUCTION_TABLE_NAME,
     Item : auction,
   }).promise();
   return {

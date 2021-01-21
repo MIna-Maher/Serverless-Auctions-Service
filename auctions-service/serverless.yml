@@ -3,7 +3,7 @@ service:
 
 plugins:
   - serverless-bundle
-  - serverless-pseudo-parameters
+  - serverless-pseudo-parameters ##used for assigning values like Region and accountId
 
 provider:
   name: aws
@@ -11,25 +11,13 @@ provider:
   memorySize: 256
   stage: ${opt:stage, 'dev'}
   region:  us-east-2 ##  Region
-  
+  environment:  ##Defining variable to pass it to the JS File.
+    AUCTION_TABLE_NAME: ${self:custom.AuctionTableDetails.name}
+  iamRoleStatements:
+   - ${file(iam/AuctionTableIAM.yml):AuctionTableIAM}
 resources:
     Resources:
-      AuctionTable:
-        Type: AWS::DynamoDB::Table
-        Properties:
-         BillingMode: PROVISIONED  ##free tier eligible
-         ProvisionedThroughput:
-          ReadCapacityUnits: 1     ###free tier eligible up to 10
-          WriteCapacityUnits: 1    ###free tier eligible up to 10
-         TableName: AuctionsTable
-         AttributeDefinitions: 
-            - AttributeName: id
-              AttributeType: S
-
-         KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        
+     AuctionsTable: ${file(resources/AuctionTable.yml):AuctionTable}
 functions:
   createAuction:
     handler: src/handlers/createAuction.handler
@@ -37,3 +25,9 @@ functions:
       - http:
           method: POST
           path: /auction
+
+custom:
+  AuctionTableDetails:
+   name: !Ref AuctionsTable ###Getting the name of table
+   arn: !GetAtt AuctionsTable.Arn ###Getting the arn 
+
