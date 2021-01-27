@@ -1,5 +1,8 @@
 AuctionTableIAM:
   Effect: 'Allow'
   Action:
-    - 'DynamoDB:PutItem'
+    - dynamodb:PutItem
+    - dynamodb:Scan
+    - dynamodb:GetItem
+    - dynamodb:UpdateItem
   Resource: ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file

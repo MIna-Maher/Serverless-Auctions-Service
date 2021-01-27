@@ -26,6 +26,31 @@ functions:
           method: POST
           path: /auction
 
+  getAuctions:
+    handler: src/handlers/getAuction.handler
+    events:
+      - http:
+          method: GET
+          path: /auctions
+
+  getAuctionById: 
+    handler: src/handlers/getAuctionById.handler
+    events:
+      - http:
+          method: GET
+          path: /auction/{id}
+
+  placingBid: 
+    handler: src/handlers/placingBid.handler
+    events:
+      - http:
+          method: PATCH
+          path: /auction/{id}/bid
+  processingAuctions: 
+    handler: src/handlers/processingAuctions.handler
+    #events:
+     # - schedule: rate(2 minutes)
+
 custom:
   AuctionTableDetails:
    name: !Ref AuctionsTable ###Getting the name of table
