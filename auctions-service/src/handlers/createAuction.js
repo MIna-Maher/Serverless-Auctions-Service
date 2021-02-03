@@ -13,7 +13,7 @@ async function createAuction(event, context) { // those arguments will be provid
     id: auctionId(),
     status: 'OPEN',
     createdAt: now.toISOString(),
-    endingDate: endDate.toDateString(),
+    endingDate: endDate.toISOString(),
     highestBid: {
       amount: 0
     }
