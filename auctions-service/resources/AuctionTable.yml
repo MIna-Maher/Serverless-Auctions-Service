@@ -1,14 +1,30 @@
 AuctionTable:
-        Type: AWS::DynamoDB::Table
-        Properties:
-         BillingMode: PROVISIONED  ##free tier eligible
-         ProvisionedThroughput:
-          ReadCapacityUnits: 1     ###free tier eligible up to 10
-          WriteCapacityUnits: 1    ###free tier eligible up to 10
-         TableName: AuctionsTable-${self:provider.stage}
-         AttributeDefinitions: 
-            - AttributeName: id
-              AttributeType: S
-         KeySchema:
-          - AttributeName: id
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: AuctionsTable-${self:provider.stage}
+    BillingMode: PROVISIONED
+    ProvisionedThroughput:
+     ReadCapacityUnits: 1 ###free tier eligible up to 10
+     WriteCapacityUnits: 1
+    AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      - AttributeName: status
+        AttributeType: S
+      - AttributeName: endingDate
+        AttributeType: S
+    KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+    GlobalSecondaryIndexes:
+      - IndexName: statusAndEndDateGSI
+        KeySchema:
+          - AttributeName: status
             KeyType: HASH
+          - AttributeName: endingDate
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+        ProvisionedThroughput:
+         ReadCapacityUnits: 1 ###free tier eligible up to 10
+         WriteCapacityUnits: 1
