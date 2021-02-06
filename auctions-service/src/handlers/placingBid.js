@@ -21,7 +21,11 @@ const auction = await getAuctionByIdValidation(id);//calling function
 //validating the number of bid
 if(auction.highestBid.amount >= amount){
     throw new createError.Forbidden(`YOUR BID must be higher than "${auction.highestBid.amount}"`);
-}
+};
+//Validating Bidding on closed Auctions:
+if(auction.status === 'CLOSED'){
+  throw new createError.Forbidden('you cannot bid on closed auction!!!!!!');
+};
  try{
     const result = await DocumentClient.update(params).promise();
     updatedAuction = result.Attributes;

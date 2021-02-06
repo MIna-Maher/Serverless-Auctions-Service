@@ -5,4 +5,8 @@ AuctionTableIAM:
     - dynamodb:Scan
     - dynamodb:GetItem
     - dynamodb:UpdateItem
-  Resource: ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file
+    - dynamodb:Query
+  Resource: 
+    - ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file
+    - !Join ['/', ['${self:custom.AuctionTableDetails.arn}', 'index', 'statusAndEndDateGSI' ]]
+  
