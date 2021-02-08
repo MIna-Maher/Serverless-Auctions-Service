@@ -23,7 +23,7 @@ if(auction.highestBid.amount >= amount){
     throw new createError.Forbidden(`YOUR BID must be higher than "${auction.highestBid.amount}"`);
 };
 //Validating Bidding on closed Auctions:
-if(auction.status === 'CLOSED'){
+if(auction.status === 'closed'){
   throw new createError.Forbidden('you cannot bid on closed auction!!!!!!');
 };
  try{
