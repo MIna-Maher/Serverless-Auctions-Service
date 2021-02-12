@@ -13,11 +13,32 @@ provider:
   region:  us-east-2 ##  Region
   environment:  ##Defining variable to pass it to the JS File.
     AUCTION_TABLE_NAME: ${self:custom.AuctionTableDetails.name}
+    AUTH_SIGNING_CERTIFICATE: ${file(Auth-Signing-Certificate.pem)}
   iamRoleStatements:
    - ${file(iam/AuctionTableIAM.yml):AuctionTableIAM}
 resources:
     Resources:
      AuctionsTable: ${file(resources/AuctionTable.yml):AuctionTable}
+     GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: EXPIRED_TOKEN
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+     AuthFailureGatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'   
 functions:
   createAuction:
     handler: src/handlers/createAuction.handler
@@ -25,6 +46,7 @@ functions:
       - http:
           method: POST
           path: /auction
+          authorizer: ${self:custom.authorizer}
 
   getAuctions:
     handler: src/handlers/getAuction.handler
@@ -32,6 +54,7 @@ functions:
       - http:
           method: GET
           path: /auctions
+          authorizer: ${self:custom.authorizer}
 
   getAuctionById: 
     handler: src/handlers/getAuctionById.handler
@@ -39,6 +62,7 @@ functions:
       - http:
           method: GET
           path: /auction/{id}
+          authorizer: ${self:custom.authorizer}
 
   placingBid: 
     handler: src/handlers/placingBid.handler
@@ -46,13 +70,18 @@ functions:
       - http:
           method: PATCH
           path: /auction/{id}/bid
+          authorizer: ${self:custom.authorizer}
   processingAuctions: 
     handler: src/handlers/processingAuctions.handler
     #events:
      # - schedule: rate(2 minutes)
+  LambdaAuthorizerFunction:
+    handler: src/handlers/LambdaAuthorizerFunction.handler
+    cors: true
 
 custom:
   AuctionTableDetails:
    name: !Ref AuctionsTable ###Getting the name of table
-   arn: !GetAtt AuctionsTable.Arn ###Getting the arn 
+   arn: !GetAtt AuctionsTable.Arn ###Getting the arn
+  authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auctions-service-${self:provider.stage}-LambdaAuthorizerFunction
 

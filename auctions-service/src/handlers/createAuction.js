@@ -6,6 +6,7 @@ import createAuctionSchame from '../lib/schemas/createAuctionSchema';
 const DocumentClient = new AWS.DynamoDB.DocumentClient(); //DocumentClient fot Connecting to DynamoDB and insert tables
 async function createAuction(event, context) { // those arguments will be provided when lambda executed.
   const { title } = event.body;
+  const { nickname } = event.requestContext.authorizer;//taking the identity of the seller(Authenticator);//part of claims//you can get list of claimsfrom https://jwt.io/
   const now = new Date();
   const endDate = new Date();
   endDate.setHours(now.getHours() +1 );
@@ -18,7 +19,8 @@ async function createAuction(event, context) { // those arguments will be provid
     endingDate: endDate.toISOString(),
     highestBid: {
       amount: 0
-    }
+    },
+    SellerName: nickname
   };
   await DocumentClient.put( {
     TableName : process.env.AUCTION_TABLE_NAME,

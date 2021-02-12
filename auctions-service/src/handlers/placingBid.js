@@ -6,18 +6,30 @@ const DocumentClient = new AWS.DynamoDB.DocumentClient(); //DocumentClient fot C
 async function placingBid(event, context) { // those arguments will be provided when lambda executed.
     const { id } = event.pathParameters;
     const { amount } = event.body;
+    const { nickname } = event.requestContext.authorizer;//taking the identity of the seller(Authenticator);//part of claims//you can get list of claimsfrom https://jwt.io/
+
     const params = {
         TableName: process.env.AUCTION_TABLE_NAME,
         Key: { id },
-        UpdateExpression: 'set highestBid.amount = :amount',
+        UpdateExpression: 'set highestBid.amount = :amount, highestBid.bidder = :bidder',
         ExpressionAttributeValues: {
           ':amount': amount,
+          ':bidder': nickname,
         },
         ReturnValues: 'ALL_NEW'
     };
 
     let updatedAuction;
 const auction = await getAuctionByIdValidation(id);//calling function
+
+//Validating Bidding on my auction!!!
+if(auction.SellerName === nickname){
+  throw new createError.Forbidden('No NO No so sorry, you cannot bid on your Auction!!!!');
+};
+//validating not double bidding
+if(auction.highestBid.bidder === nickname){
+  throw new createError.Forbidden('Please STOP, you already the last Bidder and the highest Bidder');
+}
 //validating the number of bid
 if(auction.highestBid.amount >= amount){
     throw new createError.Forbidden(`YOUR BID must be higher than "${auction.highestBid.amount}"`);
