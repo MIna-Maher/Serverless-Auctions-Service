@@ -28,3 +28,7 @@ AuctionTable:
         ProvisionedThroughput:
          ReadCapacityUnits: 1 ###free tier eligible up to 10
          WriteCapacityUnits: 1
+SQSMailQueue:
+   Type: AWS::SQS::Queue
+   Properties:
+    QueueName: ${self:custom.SQSMailQueue.name} ##By default SQS standard Queue.

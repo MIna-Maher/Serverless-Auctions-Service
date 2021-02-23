@@ -3,7 +3,8 @@ service:
 
 plugins:
   - serverless-bundle
-  - serverless-pseudo-parameters ##used for assigning values like Region and accountId
+  - serverless-pseudo-parameters ##used for assigning values like Region and accountId,taking advantage of CFN pseudo parameters
+  - serverless-iam-roles-per-function ###https://www.serverless.com/plugins/serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -38,7 +39,9 @@ resources:
         ResponseType: UNAUTHORIZED
         RestApiId:
           Ref: 'ApiGatewayRestApi'
-        StatusCode: '401'   
+        StatusCode: '401'
+     SQSMailQueue: ${file(resources/AuctionTable.yml):SQSMailQueue}
+
 functions:
   createAuction:
     handler: src/handlers/createAuction.handler
@@ -78,10 +81,23 @@ functions:
   LambdaAuthorizerFunction:
     handler: src/handlers/LambdaAuthorizerFunction.handler
     cors: true
+  SendingEmail:
+    handler: src/handlers/SendingEmail.handler
+    iamRoleStatements:
+      - ${file(iam/AuctionTableIAM.yml):LambdaSESIAM}
+    events:
+      - sqs:
+          arn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:SQSMailQueue-${self:provider.stage}
+          batchSize: 1 ###Please define this as your production, max batch size is 10
+
 
 custom:
   AuctionTableDetails:
    name: !Ref AuctionsTable ###Getting the name of table
    arn: !GetAtt AuctionsTable.Arn ###Getting the arn
   authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auctions-service-${self:provider.stage}-LambdaAuthorizerFunction
+
+  SQSMailQueue:
+   name: SQSMailQueue-${self:provider.stage}
+   arn: !GetAtt SQSMailQueue
 

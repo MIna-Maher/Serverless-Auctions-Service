@@ -9,4 +9,9 @@ AuctionTableIAM:
   Resource: 
     - ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file
     - !Join ['/', ['${self:custom.AuctionTableDetails.arn}', 'index', 'statusAndEndDateGSI' ]]
-  
+LambdaSESIAM:
+  Effect: 'Allow'
+  Action:
+    - ses:SendEmail
+  Resource:
+    - "arn:aws:ses:${self:provider.region}:*:*"
