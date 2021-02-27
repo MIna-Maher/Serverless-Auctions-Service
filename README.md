@@ -12,4 +12,5 @@
 ## The Architecture
 
 - The below design diagram as provided by @Ariel , in my code , i used different names to be easily identifiable to me as shown on the detailed services sections, However the same logic and same architecture.
-[The Design](https://github.com/MIna-Maher/Serverless-Auctions-Service/blob/main/pictures/design.png)
+- The Design:
+![The Design](https://github.com/MIna-Maher/Serverless-Auctions-Service/blob/main/pictures/design.png)
