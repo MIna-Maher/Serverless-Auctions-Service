@@ -8,3 +8,8 @@
 * This application is part from [Serverless Framework Bootcamp: Node.js, AWS & Microservices](https://www.udemy.com/course/serverless-framework/) course by [Ariel Weinberger](https://www.udemy.com/course/serverless-framework/#instructor-1).
 
 
+
+## The Architecture
+
+- The below design diagram as provided by @Ariel , in my code , i used different names to be easily identifiable to me as shown on the detailed services sections, However the same logic and same architecture.
+
