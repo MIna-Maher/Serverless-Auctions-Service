@@ -1,4 +1,7 @@
 # Serverless-Auctions-Service
-For hosting the code for Serverless Auction Service.
+
+##Introduction
+
+* Serverless-Auctions-Service is backend serverelss application for allowing the sellers to sell their products by having auctions on them 
 
 
