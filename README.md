@@ -21,3 +21,5 @@
 ### auctions-service
 - The below diagram shows the resources created on this servies, The endpoints and the methods for making the request:
 
+![auctions-service](https://github.com/MIna-Maher/Serverless-Auctions-Service/blob/main/pictures/serverless-auctions-service.png)
+
