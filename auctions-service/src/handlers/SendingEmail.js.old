@@ -7,9 +7,6 @@ async function SendingEmail(event, context) {
    const { subject, body, recipient } = email;
     var params = {
         Destination: {
-         CcAddresses: [
-            "menamaher65@gmail.com"
-         ],
          ToAddresses: [recipient]
         },
         Message: {
@@ -20,7 +17,7 @@ async function SendingEmail(event, context) {
           },
           Text: {
            Charset: "UTF-8",
-           Data: "This is the message body in text format."
+           Data: body,
           }
          },
          Subject: {
@@ -28,7 +25,7 @@ async function SendingEmail(event, context) {
           Data: subject,
          }
         },
-        Source: "menamaher65@gmail.com"
+        Source: process.env.SENDER_EMAIL_ADD
        };
        try{
         const result = await ses.sendEmail(params).promise();

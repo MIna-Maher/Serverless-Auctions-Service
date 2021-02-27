@@ -8,10 +8,20 @@ AuctionTableIAM:
     - dynamodb:Query
   Resource: 
     - ${self:custom.AuctionTableDetails.arn}  ##Self will go to serverless.yml file
-    - !Join ['/', ['${self:custom.AuctionTableDetails.arn}', 'index', 'statusAndEndDateGSI' ]]
+    - !Join ['/', ['${self:custom.AuctionTableDetails.arn}', 'index', 'statusAndEndDateGSI' ]] ###also for GSI
 LambdaSESIAM:
   Effect: 'Allow'
   Action:
     - ses:SendEmail
   Resource:
     - "arn:aws:ses:${self:provider.region}:*:*"
+SQSMailQueue:
+  Effect: Allow
+  Action:
+    - sqs:SendMessage
+  Resource: ${self:custom.SQSMailQueue.arn}
+AuctionsBucketIAM:
+  Effect: Allow
+  Action:
+    - s3:PutObject
+  Resource: arn:aws:s3:::${self:custom.AuctionsS3ImagesBucket.name}/*

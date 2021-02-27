@@ -28,7 +28,25 @@ AuctionTable:
         ProvisionedThroughput:
          ReadCapacityUnits: 1 ###free tier eligible up to 10
          WriteCapacityUnits: 1
-SQSMailQueue:
-   Type: AWS::SQS::Queue
-   Properties:
-    QueueName: ${self:custom.SQSMailQueue.name} ##By default SQS standard Queue.
+
+AuctionsS3ImagesBucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    BucketName: ${self:custom.AuctionsS3ImagesBucket.name}
+    LifecycleConfiguration:
+      Rules:
+        - Id: AuctionPicturesExpiration
+          Status: Enabled
+          ExpirationInDays: 1 ##uploaded images will be deleted after 1 day
+AuctionsS3ImagesBucketPolicy:
+  Type: AWS::S3::BucketPolicy
+  Properties:
+    Bucket: !Ref AuctionsS3ImagesBucket
+    PolicyDocument:
+      Statement:
+        - Sid: PublicRead
+          Effect: Allow
+          Principal: '*'
+          Action:
+            - s3:GetObject
+          Resource: arn:aws:s3:::${self:custom.AuctionsS3ImagesBucket.name}/*

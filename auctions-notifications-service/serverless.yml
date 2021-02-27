@@ -1,0 +1,39 @@
+service:
+  name: auctions-notifications-service
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters ##used for assigning values like Region and accountId,taking advantage of CFN pseudo parameters
+  - serverless-iam-roles-per-function ###https://www.serverless.com/plugins/serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region:  us-east-2 ##  Region
+  environment:
+        SENDER_MAIL: ########The Sender Email Address,should be registered on AWS SES####
+resources:
+    Resources:
+     SQSMailQueue: ${file(resources/SQSMailQueue.yml):SQSMailQueue}
+    Outputs:
+       SQSMailQueueArn: ${file(resources/SQSMailQueue.yml):Outputs.SQSMailQueueArn}
+       SQSMailQueueUrl: ${file(resources/SQSMailQueue.yml):Outputs.SQSMailQueueUrl}
+functions:
+  SendingEmail:
+    handler: src/handlers/SendingEmail.handler
+    iamRoleStatements:
+      - ${file(iam/AuctionTableIAM.yml):LambdaSESIAM}
+    events:
+      - sqs:
+          arn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:SQSMailQueue-${self:provider.stage}
+          batchSize: 1 ###Please define this as your production, max batch size is 10
+
+
+custom:
+  SQSMailQueue:
+   name: SQSMailQueue-${self:provider.stage}
+   arn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:SQSMailQueue-${self:provider.stage}
+   url: !Ref SQSMailQueue
+

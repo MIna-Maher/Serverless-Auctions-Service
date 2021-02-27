@@ -15,11 +15,15 @@ provider:
   environment:  ##Defining variable to pass it to the JS File.
     AUCTION_TABLE_NAME: ${self:custom.AuctionTableDetails.name}
     AUTH_SIGNING_CERTIFICATE: ${file(Auth-Signing-Certificate.pem)}
+    SQS_MAIL_QUEUE_URL: ${self:custom.SQSMailQueue.url}
+    AUCTIONS_S3_BUCKET: ${self:custom.AuctionsS3ImagesBucket.name}
   iamRoleStatements:
    - ${file(iam/AuctionTableIAM.yml):AuctionTableIAM}
 resources:
     Resources:
      AuctionsTable: ${file(resources/AuctionTable.yml):AuctionTable}
+     AuctionsS3ImagesBucket: ${file(resources/AuctionTable.yml):AuctionsS3ImagesBucket}
+     AuctionsS3ImagesBucketPolicy: ${file(resources/AuctionTable.yml):AuctionsS3ImagesBucketPolicy}
      GatewayResponse:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -40,8 +44,6 @@ resources:
         RestApiId:
           Ref: 'ApiGatewayRestApi'
         StatusCode: '401'
-     SQSMailQueue: ${file(resources/AuctionTable.yml):SQSMailQueue}
-
 functions:
   createAuction:
     handler: src/handlers/createAuction.handler
@@ -74,30 +76,37 @@ functions:
           method: PATCH
           path: /auction/{id}/bid
           authorizer: ${self:custom.authorizer}
+
   processingAuctions: 
     handler: src/handlers/processingAuctions.handler
+    iamRoleStatements:
+      - ${file(iam/AuctionTableIAM.yml):SQSMailQueue}
+      - ${file(iam/AuctionTableIAM.yml):AuctionTableIAM}
     #events:
      # - schedule: rate(2 minutes)
-  LambdaAuthorizerFunction:
-    handler: src/handlers/LambdaAuthorizerFunction.handler
-    cors: true
-  SendingEmail:
-    handler: src/handlers/SendingEmail.handler
+  uploadAuctionPicture: 
+    handler: src/handlers/uploadAuctionPicture.handler
     iamRoleStatements:
-      - ${file(iam/AuctionTableIAM.yml):LambdaSESIAM}
+      - ${file(iam/AuctionTableIAM.yml):AuctionsBucketIAM}
+      - ${file(iam/AuctionTableIAM.yml):AuctionTableIAM}
+
     events:
-      - sqs:
-          arn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:SQSMailQueue-${self:provider.stage}
-          batchSize: 1 ###Please define this as your production, max batch size is 10
+      - http:
+          method: POST
+          path: /auction/{id}/picture
+          authorizer: ${self:custom.authorizer}
 
 
 custom:
   AuctionTableDetails:
    name: !Ref AuctionsTable ###Getting the name of table
    arn: !GetAtt AuctionsTable.Arn ###Getting the arn
-  authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auctions-service-${self:provider.stage}-LambdaAuthorizerFunction
+  authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auctions-authentication-service-${self:provider.stage}-LambdaAuthorizerFunction
 
   SQSMailQueue:
-   name: SQSMailQueue-${self:provider.stage}
-   arn: !GetAtt SQSMailQueue
+   arn: ${cf:auctions-notifications-service-${self:provider.stage}.SQSMailQueueArn}
+   url: ${cf:auctions-notifications-service-${self:provider.stage}.SQSMailQueueUrl}
+  
+  AuctionsS3ImagesBucket:
+   name: auctionss3bucket-minarofaael-${self:provider.stage}
 

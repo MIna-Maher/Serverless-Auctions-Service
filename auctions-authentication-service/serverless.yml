@@ -1,0 +1,19 @@
+service:
+  name: auctions-authentication-service
+
+plugins:
+  - serverless-bundle
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region:  us-east-2 ##  Region
+  apiGateway:
+    shouldStartNameWithService: true
+  environment:  ##Defining variable to pass it to the JS File.
+    AUTH_SIGNING_CERTIFICATE: ${file(Auth-Signing-Certificate.pem)}
+functions:
+  LambdaAuthorizerFunction:
+    handler: src/handlers/LambdaAuthorizerFunction.handler
+    cors: true
